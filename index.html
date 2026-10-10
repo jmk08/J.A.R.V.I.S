@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06121b">
+<meta name="description" content="J.A.R.V.I.S. – persönlicher, kostenloser Browser-Prototyp">
+<link rel="manifest" href="manifest.json">
+<title>J.A.R.V.I.S.</title>
+<style>
+:root{--cyan:#6feaff;--cyan2:#25a9c7;--amber:#ffbd58;--bg:#03090f;--panel:rgba(6,22,32,.93);--line:rgba(111,234,255,.38);--muted:#7fa4b2}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% 43%,#0a2633 0,#06131d 36%,#02060b 76%);color:#d8f8ff;font-family:Arial,Helvetica,sans-serif}
+body{min-height:100dvh;overflow-x:hidden}.shell{min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:env(safe-area-inset-top) 16px calc(16px + env(safe-area-inset-bottom));}
+.top{width:100%;max-width:680px;display:flex;align-items:center;justify-content:space-between;padding:18px 2px 8px;font-size:11px;letter-spacing:2.4px;color:var(--cyan);text-transform:uppercase}.status{color:#8bd4df;letter-spacing:1px}.status:before{content:"";display:inline-block;width:6px;height:6px;background:#55f6b0;border-radius:50%;margin:0 8px 1px 0;box-shadow:0 0 9px #55f6b0}
+.main{width:100%;max-width:680px;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;position:relative}
+.hud{font-size:10px;letter-spacing:3px;color:#5f9daa;text-align:center;margin:0 0 22px}
+.reactor-button{appearance:none;border:0;background:transparent;color:var(--cyan);width:min(66vw,290px);aspect-ratio:1;position:relative;cursor:pointer;display:grid;place-items:center;filter:drop-shadow(0 0 15px rgba(47,209,255,.24));-webkit-tap-highlight-color:transparent}
+.reactor{width:72%;aspect-ratio:1;border-radius:50%;position:relative;border:1px solid rgba(111,234,255,.6);box-shadow:0 0 0 8px rgba(25,155,193,.05),0 0 0 18px rgba(25,155,193,.04),inset 0 0 25px rgba(63,214,255,.16);animation:pulse 3.2s ease-in-out infinite}
+.reactor:before,.reactor:after{content:"";position:absolute;inset:10%;border-radius:50%;border:2px dashed rgba(111,234,255,.45);animation:spin 30s linear infinite}
+.reactor:after{inset:23%;border:1px solid rgba(111,234,255,.7);animation:spin 18s linear infinite reverse}
+.core{position:absolute;inset:34%;border-radius:50%;background:radial-gradient(circle,#eaffff 0,#7befff 18%,#18a9d1 44%,rgba(10,97,135,.45) 72%,transparent 73%);box-shadow:0 0 18px #4edbff,0 0 45px rgba(42,191,255,.65);animation:core 2.1s ease-in-out infinite}
+.arc{position:absolute;width:100%;height:100%;border:1px solid rgba(111,234,255,.18);clip-path:polygon(47% 0,53% 0,53% 22%,47% 22%,47% 0);transform:rotate(45deg)}
+@keyframes pulse{0%,100%{transform:scale(.98);box-shadow:0 0 0 8px rgba(25,155,193,.05),0 0 0 18px rgba(25,155,193,.04),inset 0 0 25px rgba(63,214,255,.16)}50%{transform:scale(1.02);box-shadow:0 0 0 11px rgba(25,155,193,.08),0 0 0 23px rgba(25,155,193,.05),inset 0 0 32px rgba(63,214,255,.22)}}
+@keyframes core{0%,100%{opacity:.8;transform:scale(.93)}50%{opacity:1;transform:scale(1.08)}}@keyframes spin{to{transform:rotate(360deg)}}
+.listening .reactor{border-color:var(--amber);box-shadow:0 0 0 10px #ffbd5810,0 0 35px #ffbd5830,inset 0 0 30px #ffbd5822}.listening .core{background:radial-gradient(circle,#fff 0,#ffe4ad 20%,#ffbd58 48%,transparent 73%);box-shadow:0 0 30px #ffbd58}
+.taplabel{font-size:12px;letter-spacing:2px;color:var(--cyan);margin-top:16px;text-align:center}.sub{font-size:11px;color:#628a98;margin-top:8px;text-align:center;max-width:290px;line-height:1.5}
+.bottom{width:100%;max-width:680px}.commandbar{display:flex;gap:8px;margin:14px 0 10px}.commandbar input{flex:1;min-width:0;background:#071722;border:1px solid var(--line);border-radius:4px;padding:14px;color:#e4fbff;font-size:14px;outline:none}.commandbar input:focus{border-color:var(--cyan)}button.action{background:#092431;border:1px solid var(--line);color:var(--cyan);padding:0 15px;border-radius:4px;letter-spacing:1px;font-size:11px;text-transform:uppercase;cursor:pointer}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.chip{background:transparent;border:1px solid rgba(111,234,255,.22);color:#84b9c7;border-radius:3px;padding:9px 11px;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.panel{position:fixed;inset:auto 10px 10px;max-height:67dvh;overflow:auto;z-index:5;background:var(--panel);border:1px solid var(--line);box-shadow:0 0 35px #000b,0 0 18px #1aaed51c;backdrop-filter:blur(14px);padding:16px;border-radius:4px;display:none}.panel.open{display:block}.panelhead{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}.panelhead h2{font-size:12px;letter-spacing:2px;font-weight:400;color:var(--cyan);margin:0;text-transform:uppercase}.close{background:transparent;border:0;color:var(--amber);font-size:22px;padding:0 4px}.result{font-size:13px;line-height:1.55;color:#d0e9ef;white-space:pre-wrap}.result a{color:var(--cyan)}.story{padding:10px 0;border-bottom:1px solid #25414a}.story b{display:block;color:#d9f8ff;font-size:13px;margin-bottom:5px}.story a{color:var(--cyan);font-size:11px;text-decoration:none}.small{font-size:10px;color:var(--muted);line-height:1.5}.settings{display:none;margin-top:12px;border:1px solid #244956;padding:12px}.settings.open{display:block}.settings label{display:block;font-size:11px;color:var(--cyan);margin:10px 0 6px}.settings input,.settings select{width:100%;background:#020b11;border:1px solid #315664;color:#e0faff;padding:11px;border-radius:3px}.settings button{margin-top:10px}.notice{font-size:11px;color:#ffca78;line-height:1.5;margin:10px 0}
+@media(min-width:600px){.panel{left:50%;right:auto;transform:translateX(-50%);width:min(620px,calc(100% - 28px));bottom:18px}.top{padding-top:28px}}
+</style>
+</head>
+<body>
+<div class="shell">
+ <header class="top"><span>Stark Industries // AI</span><span class="status" id="status">System bereit</span></header>
+ <main class="main" id="main">
+  <p class="hud">J.A.R.V.I.S. &nbsp; / &nbsp; PERSONAL INTERFACE</p>
+  <button class="reactor-button" id="reactorBtn" aria-label="Sprachsteuerung starten"><span class="reactor"><span class="arc"></span><span class="core"></span></span></button>
+  <div class="taplabel" id="taplabel">BERÜHREN, UM ZU SPRECHEN</div>
+  <div class="sub" id="sub">Online-Assistent · Sprachsteuerung benötigt Chrome und eine HTTPS-Seite</div>
+ </main>
+ <footer class="bottom">
+  <div class="commandbar"><input id="command" autocomplete="off" placeholder="Befehl eingeben …"><button class="action" id="send">Senden</button></div>
+  <div class="actions"><button class="chip" data-cmd="Zeige mir die Top-Nachrichten">Nachrichten</button><button class="chip" data-cmd="Wie spät ist es?">Uhrzeit</button><button class="chip" data-cmd="Hilfe">Befehle</button><button class="chip" id="settingsBtn">API einrichten</button></div>
+  <div class="settings" id="settings">
+   <div class="small">Für flexible Antworten nutzt J.A.R.V.I.S. die Gemini API. Der kostenlose Tarif ist begrenzt. Der Schlüssel bleibt in dieser Browser-Sitzung und wird direkt an Google gesendet. Diese reine Browser-Version ist ein privater Prototyp – teile die Seite nicht öffentlich mit aktivem Schlüssel.</div>
+   <label for="apiKey">Gemini API-Schlüssel</label><input id="apiKey" type="password" placeholder="AIza…">
+   <label for="model">Modell</label><select id="model"><option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (sparsam)</option><option value="gemini-2.5-flash">Gemini 2.5 Flash</option></select>
+   <button class="action" id="saveKey">Für diese Sitzung aktivieren</button>
+   <div class="small">Schlüssel erstellen: <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Ohne Schlüssel funktionieren lokale Befehle, Uhrzeit, Suche und Spracheingabe weiterhin.</div>
+   <p class="notice">Wichtig: Keine Zahlungsdaten hinzufügen und in Google AI Studio die Nutzungslimits prüfen. Kostenlose Kontingente können sich ändern. API-Schlüssel nicht in öffentlich geteilte Dateien schreiben.</p>
+  </div>
+ </footer>
+</div>
+<section class="panel" id="panel" role="dialog" aria-modal="true"><div class="panelhead"><h2 id="panelTitle">Systemausgabe</h2><button class="close" id="closePanel" aria-label="Schließen">×</button></div><div class="result" id="result"></div></section>
+<script>
+const $=id=>document.getElementById(id);
+let apiKey='', model='gemini-2.5-flash-lite', listening=false, recognition=null, history=[];
+const systemPrompt=`Du bist J.A.R.V.I.S., ein ruhiger, höflicher, präziser persönlicher KI-Assistent im Stil einer futuristischen Stark-Industries-Oberfläche. Antworte auf Deutsch, sofern der Nutzer nicht anders spricht. Sei hilfreich, knapp und transparent. Erfinde keine Live-Daten. Du kannst keine echten Geräte steuern und keine Aktionen außerhalb dieser Browser-App ausführen. Wenn Nutzer Nachrichten oder aktuelle Fakten möchten, sage ehrlich, wenn du keinen Live-Zugriff hast, und biete eine Websuche an.`;
+function speak(t){if(!('speechSynthesis'in window))return;window.speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='de-DE';u.rate=.94;u.pitch=.82;let voices=window.speechSynthesis.getVoices();let v=voices.find(v=>v.lang==='de-DE'&&/Google|German/i.test(v.name))||voices.find(v=>v.lang.startsWith('de'));if(v)u.voice=v;window.speechSynthesis.speak(u)}
+function openPanel(title,html){$('panelTitle').textContent=title;$('result').innerHTML=html;$('panel').classList.add('open')}
+function closePanel(){$('panel').classList.remove('open')}
+function setStatus(s){$('status').textContent=s}
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function webSearch(q){openPanel('Websuche',`<p>Ich öffne die Websuche für:</p><p><b>${safe(q)}</b></p><p><a href="https://www.google.com/search?q=${encodeURIComponent(q)}" target="_blank" rel="noopener">Google-Suche öffnen ↗</a></p><p><a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent(q)}" target="_blank" rel="noopener">Nachrichten dazu öffnen ↗</a></p>`)}
+function showNews(){openPanel('Aktuelle Nachrichten',`<p>Für echte Live-Nachrichten öffne ich eine aktuelle Suche. So vermeiden wir erfundene Schlagzeilen.</p><div class="story"><b>Spanien & Katalonien</b><a href="https://news.google.com/search?q=${encodeURIComponent('Spain Catalonia')}&hl=de&gl=ES&ceid=ES:de" target="_blank" rel="noopener">Aktuelle Meldungen öffnen ↗</a></div><div class="story"><b>Deutschland & Welt</b><a href="https://news.google.com/?hl=de&gl=DE&ceid=DE:de" target="_blank" rel="noopener">Top-Nachrichten öffnen ↗</a></div><div class="story"><b>Technologie & KI</b><a href="https://news.google.com/search?q=${encodeURIComponent('KI künstliche Intelligenz Technologie')}&hl=de&gl=DE&ceid=DE:de" target="_blank" rel="noopener">KI-Nachrichten öffnen ↗</a></div>`);speak('Natürlich. Ich habe die aktuellen Nachrichtenbereiche vorbereitet.');}
+async function askGemini(q){
+ if(!apiKey){openPanel('KI nicht verbunden',`<p>Für freie Formulierungen und komplexe Fragen fehlt noch der API-Schlüssel.</p><p>Tippe auf <b>API einrichten</b>, erstelle kostenlos einen Schlüssel bei Google AI Studio und füge ihn ein.</p><p>Deine lokalen Befehle funktionieren auch ohne KI.</p>`);return}
+ setStatus('KI verarbeitet …');$('taplabel').textContent='ANFRAGE WIRD VERARBEITET';
+ history.push({role:'user',parts:[{text:q}]});
+ try{
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const body={systemInstruction:{parts:[{text:systemPrompt}]},contents:history.slice(-10),generationConfig:{temperature:.55,maxOutputTokens:650}};
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await r.json();
+  if(!r.ok)throw new Error(data.error?.message||`HTTP ${r.status}`);
+  const answer=(data.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('\n').trim()||'Ich konnte keine Antwort erzeugen.';
+  history.push({role:'model',parts:[{text:answer}]});
+  openPanel('J.A.R.V.I.S. // Antwort',`<div>${safe(answer).replace(/\n/g,'<br>')}</div><p class="small">KI-Antwort · Bitte wichtige Fakten überprüfen.</p>`);speak(answer);
+ }catch(e){history.pop();openPanel('Verbindungsfehler',`<p>${safe(e.message)}</p><p class="small">Prüfe Internet, API-Schlüssel und das kostenlose Kontingent.</p>`)}
+ finally{setStatus('System bereit');$('taplabel').textContent='BERÜHREN, UM ZU SPRECHEN'}
+}
+async function handle(q){
+ q=q.trim();if(!q)return;$('command').value='';const s=q.toLowerCase();
+ if(/^(hilfe|help|befehle|was kannst du)/.test(s)){openPanel('Verfügbare Funktionen',`<p><b>Lokale Befehle</b></p><ul><li>„Zeige Nachrichten“ – aktuelle Nachrichtenseiten</li><li>„Suche nach …“ – Websuche</li><li>„Wie spät ist es?“ – lokale Uhrzeit</li><li>„Merke dir …“ – lokale Notiz</li><li>„Zeige meine Notizen“</li><li>„Schließe das Fenster“</li></ul><p>Mit Gemini API kannst du zusätzlich frei formulierte Fragen stellen. Das ist noch kein autonomes Agentensystem und kann keine beliebigen Apps fernsteuern.</p>`);speak('Ich kann suchen, Notizen speichern, die Uhrzeit nennen und mit der verbundenen KI Fragen beantworten.');return}
+ if(/(schließe|schliess|fenster zu|popup zu)/.test(s)){closePanel();speak('Fenster geschlossen.');return}
+ if(/(nachrichten|news|schlagzeilen|was ist heute passiert)/.test(s)){showNews();return}
+ if(/wie spät|uhrzeit|wie viel uhr/.test(s)){const d=new Date();const t=d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});openPanel('Systemzeit',`<p style="font-size:38px;color:var(--cyan);margin:8px 0">${t}</p><p>${d.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>`);speak('Es ist '+t+' Uhr.');return}
+ if(/^(suche|such|google)\s/.test(s)){const query=q.replace(/^(suche nach|suche|such nach|such|google)\s*/i,'');webSearch(query||q);return}
+ if(/^(merke dir|merk dir|notiere|notier)\s/.test(s)){const note=q.replace(/^(merke dir|merk dir|notiere|notier)\s*/i,'');let notes=JSON.parse(localStorage.getItem('jarvis_notes')||'[]');notes.unshift({text:note,date:new Date().toLocaleString('de-DE')});localStorage.setItem('jarvis_notes',JSON.stringify(notes.slice(0,50)));openPanel('Notiz gespeichert',`<p>${safe(note)}</p><p class="small">Lokal auf diesem Browser gespeichert.</p>`);speak('Notiz gespeichert.');return}
+ if(/notizen|was habe ich gespeichert/.test(s)){let notes=JSON.parse(localStorage.getItem('jarvis_notes')||'[]');openPanel('Lokale Notizen',notes.length?notes.map(n=>`<div class="story"><b>${safe(n.text)}</b><span class="small">${safe(n.date)}</span></div>`).join(''):'<p>Keine Notizen vorhanden.</p>');return}
+ if(/(öffne|öffnen)\s+(youtube|youtube.com)/.test(s)){window.open('https://m.youtube.com','_blank','noopener');return}
+ await askGemini(q);
+}
+$('send').onclick=()=>handle($('command').value);$('command').addEventListener('keydown',e=>{if(e.key==='Enter')handle($('command').value)});
+document.querySelectorAll('[data-cmd]').forEach(b=>b.onclick=()=>handle(b.dataset.cmd));
+$('closePanel').onclick=closePanel;
+$('settingsBtn').onclick=()=>$('settings').classList.toggle('open');
+$('saveKey').onclick=()=>{apiKey=$('apiKey').value.trim();model=$('model').value;if(!apiKey){alert('Bitte zuerst einen API-Schlüssel einfügen.');return}setStatus('KI verbunden');$('settings').classList.remove('open');openPanel('KI bereit','<p>Gemini ist für diese Sitzung aktiviert. Stelle eine Frage über das Eingabefeld oder per Sprache.</p>');};
+function startListening(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){openPanel('Spracherkennung nicht verfügbar','<p>Dieser Browser bietet keine Web Speech API an. Nutze Chrome auf Android oder gib den Befehl unten ein.</p>');return}
+ if(listening){recognition?.stop();return}
+ recognition=new SR();recognition.lang='de-DE';recognition.interimResults=false;recognition.maxAlternatives=1;recognition.continuous=false;
+ recognition.onstart=()=>{listening=true;$('main').classList.add('listening');$('taplabel').textContent='ICH HÖRE ZU …';setStatus('Spracherkennung aktiv')};
+ recognition.onresult=e=>{const t=e.results[0][0].transcript;$('command').value=t;handle(t)};
+ recognition.onerror=e=>{setStatus('System bereit');openPanel('Mikrofon / Sprache',`<p>${safe(e.error)}</p><p class="small">Erlaube Mikrofonzugriff in Chrome. Mikrofonzugriff benötigt meist eine HTTPS-Seite.</p>`)};
+ recognition.onend=()=>{listening=false;$('main').classList.remove('listening');$('taplabel').textContent='BERÜHREN, UM ZU SPRECHEN';setStatus('System bereit')};
+ try{recognition.start()}catch(e){openPanel('Spracherkennung',safe(e.message))}
+}
+$('reactorBtn').onclick=startListening;
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+</script>
+</body></html>
